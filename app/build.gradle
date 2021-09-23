@@ -12,7 +12,7 @@ android {
         // Make sure this is consistent with the redirect URI used in res/raw/auth_config.json,
         // or specify additional redirect URIs in AndroidManifest.xml
         manifestPlaceholders = [
-                'appAuthRedirectScheme': 'net.openid.appauthdemo'
+                'appAuthRedirectScheme': "net.openid.appauthdemo"
         ]
     }
 
@@ -48,7 +48,8 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:${project.googleVersions.glide}"
     implementation "com.squareup.okio:okio:${project.okioVersion}"
     implementation "joda-time:joda-time:${project.jodaVersion}"
-
+    implementation 'com.android.volley:volley:1.2.0'
+    implementation 'com.android.support:customtabs:25.2.0'
     annotationProcessor "com.github.bumptech.glide:compiler:${project.googleVersions.glide}"
 }
 

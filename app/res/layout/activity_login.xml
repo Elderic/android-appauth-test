@@ -143,6 +143,12 @@
                     android:layout_height="wrap_content"
                     android:textIsSelectable="true" />
 
+                <Button
+                    android:id="@+id/button_offline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Unauthenticated Access" />
+
             </LinearLayout>
 
             <!-- displayed if there is an error. -->

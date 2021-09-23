@@ -28,6 +28,7 @@ import net.openid.appauth.RegistrationResponse;
 import net.openid.appauth.TokenResponse;
 import org.json.JSONException;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * This stores the instance in a shared preferences file, and provides thread-safe access and
  * mutation.
  */
-public class AuthStateManager {
+public class AuthStateManager implements Serializable {
 
     private static final AtomicReference<WeakReference<AuthStateManager>> INSTANCE_REF =
             new AtomicReference<>(new WeakReference<>(null));

@@ -190,6 +190,12 @@
                         tools:text="{'blah': 'blah'}" />
                 </LinearLayout>
             </LinearLayout>
+
+            <Button
+                android:id="@+id/web_api_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Web API App Button" />
         </LinearLayout>
     </ScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

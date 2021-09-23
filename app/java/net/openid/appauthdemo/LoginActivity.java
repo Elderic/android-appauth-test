@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -63,6 +64,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import android.net.Uri;
 
 /**
  * Demonstrates the usage of the AppAuth to authorize a user with an OAuth2 / OpenID Connect
@@ -118,6 +121,9 @@ public final class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
+        Button webApiAppsButton = (Button) findViewById(R.id.button_offline);
+        webApiAppsButton.setOnClickListener((View view) -> launchTest());
+
         findViewById(R.id.retry).setOnClickListener((View view) ->
                 mExecutor.submit(this::initializeAppAuth));
         findViewById(R.id.start_auth).setOnClickListener((View view) -> startAuth());
@@ -146,6 +152,22 @@ public final class LoginActivity extends AppCompatActivity {
         mExecutor.submit(this::initializeAppAuth);
     }
 
+        @MainThread
+    private void launchTest() {
+        displayLoading("Launch Web API Application Activity");
+        String url = "http://test3.savanah.iamts.ovh/";
+        /*
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(url));
+        */
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+// set toolbar color and/or setting custom actions before invoking build()
+// Once ready, call CustomTabsIntent.Builder.build() to create a CustomTabsIntent
+        CustomTabsIntent customTabsIntent = builder.build();
+// and launch the desired Url with CustomTabsIntent.launchUrl()
+        customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -477,6 +499,7 @@ public final class LoginActivity extends AppCompatActivity {
                 mConfiguration.getRedirectUri())
                 .setScope(mConfiguration.getScope());
 
+        Log.i(TAG, "Redirect URI : " + mConfiguration.getRedirectUri());
         if (!TextUtils.isEmpty(loginHint)) {
             authRequestBuilder.setLoginHint(loginHint);
         }

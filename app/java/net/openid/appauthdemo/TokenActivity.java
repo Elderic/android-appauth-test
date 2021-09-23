@@ -13,9 +13,13 @@
  */
 
 package net.openid.appauthdemo;
+import net.openid.appauthdemo.RequestQueueManager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,10 +32,18 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthState.AuthStateAction;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
@@ -49,10 +61,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-
 
 /**
  * Displays the authorized state of the user. This activity is provided with the outcome of the
@@ -260,8 +272,126 @@ public class TokenActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to read userinfo JSON", ex);
             }
         }
+
+        Button webApiAppsButton = (Button) findViewById(R.id.web_api_button);
+        webApiAppsButton.setVisibility(state.getRefreshToken() != null
+            ? View.VISIBLE
+            : View.GONE);
+        webApiAppsButton.setOnClickListener((View view) -> launchTest());
     }
 
+    @MainThread
+    private void launchTest() {
+        displayLoading("Launch Web API Application Activity");
+        String url = "http://test3.savanah.iamts.ovh/";
+        /*
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(url));
+        */
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+// set toolbar color and/or setting custom actions before invoking build()
+// Once ready, call CustomTabsIntent.Builder.build() to create a CustomTabsIntent
+        CustomTabsIntent customTabsIntent = builder.build();
+// and launch the desired Url with CustomTabsIntent.launchUrl()
+        customTabsIntent.launchUrl(this, Uri.parse(url));
+    }
+
+    @MainThread
+    private void launchWebApiAppActivity() {
+        displayLoading("Launch Web API Application Activity");
+        String packageName = "home.iam.portal.webapiclient";
+        //Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+        //intent.putExtra("AuthStateManager", mStateManager);
+
+        //String accessTokenJson = mStateManager.getCurrent().getAccessToken();
+        String accessTokenJson = mStateManager.getCurrent().getAccessToken();
+
+        //intent.setAction(Intent.ACTION_SEND);
+        //intent.putExtra(Intent.EXTRA_TEXT, accessTokenJson);
+        //intent.setType("text/plain");
+
+        //String accessTokenJson = mStateManager.
+
+        Log.e(TAG + "AccessTok",accessTokenJson);
+        Log.i(TAG,"Launch Web API Application Activity");
+
+        String url = "http://flask-app.portal.iam.home/api/v1/resources/members/paskel";
+
+        mStateManager.getCurrent().performActionWithFreshTokens(mAuthService, new AuthStateAction() {
+            @Override public void execute(
+                String accessToken,
+                String idToken,
+                AuthorizationException ex) {
+                if (ex != null) {
+                    // negotiation for fresh tokens failed, check ex for more details
+                    return;
+                }
+
+                Log.e(TAG + "AccessTok",accessToken);
+                Log.e(TAG + "AccessTok",idToken);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            //dateTextView.setText("Response: " + response.toString());
+                            Log.i(TAG+"Resp : ", response.toString());
+                        }
+                    }, new Response.ErrorListener() {
+
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // TODO: Handle error
+                            //dateTextView.setText("Error : " + error.toString());
+                            Log.e(TAG+"Error : ", error.toString());
+                            Log.e(TAG+"Error : ", error.getMessage());
+                            Log.e(TAG+"Error : ", error.getCause().toString());
+                            Log.e(TAG+"Error : ", error.getStackTrace().toString());
+                            //Log.e(TAG+"Error : ", error.networkResponse.toString());
+                            //Log.e(TAG+"Error : ", String.valueOf(error.getStackTrace()));
+                            Log.e(TAG+"Error : ", "=================== SHARED PREFERENCES =====================");
+                            Log.e(TAG+"Error : ", getSharedPreferences("auth",MODE_PRIVATE).toString());
+                            // for (ApplicationInfo packageInfo : packages)
+                            SharedPreferences authPrefs = getSharedPreferences("auth", MODE_PRIVATE);
+                            String stateJson = authPrefs.getString("stateJson", null);
+                            if (stateJson != null) {
+                                //return AuthState.jsonDeserialize(stateJson);
+                                Log.e(TAG+"Error : ", "stateJson : "+stateJson);
+                            } else {
+                                //return new AuthState();
+                                Log.e(TAG+"Error : ", "stateJson : "+stateJson);
+                            }
+                            Log.e(TAG+"Error : ", "=================== SHARED PREFERENCES =====================");
+
+                            if( error instanceof AuthFailureError) {
+                                Log.e(TAG+"Error : ", error.toString()+" EQUAAAAAAAAAAAAAAALS");
+                                String packageName = "net.openid.appauthdemo";
+                                Intent intent = getPackageManager().getLaunchIntentForPackage(packageName);
+                                //Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+                                //mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                                //List<ResolveInfo> pkgAppsList = getApplicationContext().getPackageManager().queryIntentActivities( mainIntent, 0);
+
+                            } else {
+                                Log.e(TAG+"Error : ", error.toString()+" NOT GOOOOOOOOOOOOOOOOOOD");
+                            }
+                        }
+                    });
+                Log.i(TAG+"OnStart ", jsonObjectRequest.toString());
+                Log.i(TAG+"OnStart ", jsonObjectRequest.getUrl().toString());
+                // Access the RequestQueue through your singleton class.
+                RequestQueueManager.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+                // use the access token to do something ...
+            }
+        });
+        /*
+        performTokenRequest(
+            mStateManager.getCurrent().createTokenRefreshRequest(),
+            this::handleAccessTokenResponse);
+        */
+
+        //startActivity(intent);
+    }
     @MainThread
     private void refreshAccessToken() {
         displayLoading("Refreshing access token");
