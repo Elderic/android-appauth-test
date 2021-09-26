@@ -283,7 +283,7 @@ public class TokenActivity extends AppCompatActivity {
     @MainThread
     private void launchTest() {
         displayLoading("Launch Web API Application Activity");
-        String url = "http://test3.savanah.iamts.ovh/";
+        String url = "http://testdashboard.savanah.iamts.ovh/";
         /*
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         CustomTabsIntent customTabsIntent = builder.build();
